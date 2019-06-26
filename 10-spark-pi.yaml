@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: spark
+  name: spark-edge
+  labels:
+    app: spark
+    spark: edge
+spec:
+  serviceAccountName: spark-sa
+  restartPolicy: Never
+  containers:
+  - name: spark-edge
+    image: dwarfcu/spark-edge:2.4.3
+    resources:
+      limits:
+        cpu: "1"
+        memory: "100Mi"
+    command: ["/opt/spark/bin/spark-submit",
+              "--name","spark-pi",
+              "--master","k8s://https://slik8sm01:6443",
+              "--deploy-mode","cluster",
+              "--class","org.apache.spark.examples.SparkPi",
+              "--conf","spark.kubernetes.driver.pod.name=pi-driver-1",
+              "--conf","spark.kubernetes.namespace=spark",
+              "--conf","spark.executor.instances=3",
+              "--conf","spark.kubernetes.container.image=dwarfcu/spark:2.4.3",
+              "--conf","spark.kubernetes.authenticate.driver.serviceAccountName=spark-sa",
+              "--conf","spark.kubernetes.authenticate.submission.oauthTokenFile=/var/run/secrets/kubernetes.io/serviceaccount/token",
+              "--conf","spark.kubernetes.authenticate.submission.caCertFile=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+              "local:///opt/spark/examples/jars/spark-examples_2.11-2.4.3.jar","10000"]

@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: spark
+  name: wordcount-configmap
+data:
+  wordCount.txt.file: |-
+    hola mundo v1
+    Hola Mundo v2
+    HOLA MUNDO v3
+    hola MUNDO v4
+    H0LA MUND0 v5
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: spark
+  name: spark-edge
+  labels:
+    app: spark
+    spark: edge
+spec:
+  serviceAccountName: spark-sa
+  restartPolicy: Never
+  containers:
+  - name: spark-edge
+    image: dwarfcu/spark-edge:2.4.3
+    resources:
+      limits:
+        cpu: "1"
+        memory: "100Mi"
+    command: ["/opt/spark/bin/spark-submit",
+              "--name","spark-wordCount",
+              "--master","k8s://https://slik8sm01:6443",
+              "--deploy-mode","cluster",
+              "--class","com.dwarfcu.WordCount",
+              "--conf","spark.kubernetes.driver.pod.name=wordcount-driver-1",
+              "--conf","spark.kubernetes.namespace=spark",
+              "--conf","spark.executor.instances=3",
+              "--conf","spark.kubernetes.container.image=dwarfcu/spark:2.4.3",
+              "--conf","spark.kubernetes.authenticate.driver.serviceAccountName=spark-sa",
+              "--conf","spark.kubernetes.authenticate.submission.oauthTokenFile=/var/run/secrets/kubernetes.io/serviceaccount/token",
+              "--conf","spark.kubernetes.authenticate.submission.caCertFile=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+              "local:///tmp/wordCount/jars/wordCount-1.0.jar"]
+    volumeMounts:
+      - name: wordcounttext-vol
+        mountPath: /tmp/wordCount
+      - name: wordcountjar-vol
+        mountPath: /tmp/wordCount/jars/
+  volumes:
+    - name: wordcounttext-vol
+      configMap:
+        name: wordcount-configmap
+        items:
+          - key: wordCount.txt.file
+            path: wordCount.txt
+    - name: wordcountjar-vol
+      configMap:
+        name: wordcount-jar
+        items:
+          - key: wordCount-1.0.jar
+            path: wordCount-1.0.jar
