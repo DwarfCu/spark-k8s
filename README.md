@@ -128,7 +128,7 @@ kubectl delete -f 20-spark-wordCount.yaml
 kubectl delete -f 00-evn.yaml
 ```
 
-Or you can delete only spark Namespace and then all contained resources will be also deleted.
+Or you can delete only the spark namespace and then all contained resources will also be deleted.
 
 ```bash
 kubectl delete namespaces spark
