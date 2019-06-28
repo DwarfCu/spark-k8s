@@ -31,7 +31,7 @@ spec:
         memory: "100Mi"
     command: ["/opt/spark/bin/spark-submit",
               "--name","spark-wordCount",
-              "--master","k8s://https://slik8sm01:6443",
+              "--master","k8s://https://192.168.7.70:6443",
               "--deploy-mode","cluster",
               "--class","com.dwarfcu.WordCount",
               "--conf","spark.kubernetes.driver.pod.name=wordcount-driver-1",
@@ -58,5 +58,5 @@ spec:
       configMap:
         name: wordcount-jar
         items:
-          - key: wordCount-1.0.jar
+          - key: wordCount-1.0.jar.file
             path: wordCount-1.0.jar

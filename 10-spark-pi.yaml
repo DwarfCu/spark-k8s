@@ -18,7 +18,7 @@ spec:
         memory: "100Mi"
     command: ["/opt/spark/bin/spark-submit",
               "--name","spark-pi",
-              "--master","k8s://https://slik8sm01:6443",
+              "--master","k8s://https://192.168.7.70:6443",
               "--deploy-mode","cluster",
               "--class","org.apache.spark.examples.SparkPi",
               "--conf","spark.kubernetes.driver.pod.name=pi-driver-1",

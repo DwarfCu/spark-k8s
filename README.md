@@ -10,8 +10,8 @@
 
 ```bash
 kubectl cluster-info
-Kubernetes master is running at https://slik8sm01/clusters/c-8bhgq
-KubeDNS is running at https://slik8sm01/k8s/clusters/c-8bhgq/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes master is running at https://192.168.7.70/clusters/c-8bhgq
+KubeDNS is running at https://192.168.7.70/k8s/clusters/c-8bhgq/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 ```
 
 ### A runnable distribution of Spark +2.3
@@ -55,7 +55,7 @@ kubectl create -f 00-env.yaml
 kubectl run spark --image=dwarfcu/spark:2.4.3 -it -n spark --serviceaccount=spark-sa --restart='Never' --rm=true \
  -- /opt/spark/bin/spark-submit \
  --name spark-pi \
- --master k8s://https://slik8sm01:6443 \
+ --master k8s://https://192.168.7.70:6443 \
  --deploy-mode cluster \
  --class org.apache.spark.examples.SparkPi \
  --conf spark.kubernetes.driver.pod.name=pi-driver-1 \
@@ -110,7 +110,14 @@ kubectl create -f 00-env.yaml
 3. Create a ConfigMap from a binary file, i.e. from the JAR file.
 
 ```bash
-kubectl create configmap -n spark wordcount-jar  --from-file=wordCount/target/wordCount-1.0.jar
+kubectl create configmap -n spark wordcount-jar --from-file=wordCount-1.0.jar.file=wordCount/target/wordCount-1.0.jar
+
+# Check that configmap has been created correctly
+kubectl get configmaps -n spark wordcount-jar -o yaml
+apiVersion: v1
+binaryData:
+  wordCount-1.0.jar.file: UEsDBAoACA...
+...
 ```
 
 4. Create a pod for submitting the Spark (JAVA) application (ConfigMaps/Volumes are also mounted).
@@ -121,11 +128,11 @@ kubectl create -f 20-spark-wordCount.yaml
 5. Delete environment.
 
 ```bash
-kubectl delete pod -n spark wordCount-driver-1
+kubectl delete pod -n spark wordcount-driver-1
 
 kubectl delete -f 20-spark-wordCount.yaml
 
-kubectl delete -f 00-evn.yaml
+kubectl delete -f 00-env.yaml
 ```
 
 Or you can delete only the spark namespace and then all contained resources will also be deleted.
